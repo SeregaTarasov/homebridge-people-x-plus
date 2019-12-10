@@ -1,4 +1,5 @@
 var ping = require('ping');
+var arp = require('arp-a');
 var moment = require('moment');
 var request = require("request");
 var http = require('http');
@@ -16,7 +17,7 @@ module.exports = function(homebridge) {
     HomebridgeAPI = homebridge;
     FakeGatoHistoryService = require('fakegato-history')(homebridge);
 
-    homebridge.registerPlatform("homebridge-people", "PeopleX", PeoplePlatform);
+    homebridge.registerPlatform("homebridge-people", "PeopleXPlus", PeoplePlatform);
     homebridge.registerAccessory("homebridge-people", "PeopleAccessory", PeopleAccessory);
     homebridge.registerAccessory("homebridge-people", "PeopleAllAccessory", PeopleAllAccessory);
 }
@@ -32,7 +33,7 @@ function PeoplePlatform(log, config){
     this.nooneSensor = ((typeof(config['nooneSensor']) != "undefined" && config['nooneSensor'] !== null)?config['nooneSensor']:true);
     this.webhookPort = config["webhookPort"] || 51828;
     this.cacheDirectory = config["cacheDirectory"] || HomebridgeAPI.user.persistPath();
-    this.pingInterval = config["pingInterval"] || 10000;
+    this.checkInterval = config["checkInterval"] || 10000;
     this.ignoreReEnterExitSeconds = config["ignoreReEnterExitSeconds"] || 0;
     this.people = config['people'];
     this.storage = require('node-persist');
@@ -169,7 +170,8 @@ function PeopleAccessory(log, config, platform) {
     this.target = config['target'];
     this.platform = platform;
     this.threshold = config['threshold'] || this.platform.threshold;
-    this.pingInterval = config['pingInterval'] || this.platform.pingInterval;
+    this.checkInterval = config['checkInterval'] || this.platform.checkInterval;
+    this.isMacAddress = config['isMacAddress'];
     this.ignoreReEnterExitSeconds = config['ignoreReEnterExitSeconds'] || this.platform.ignoreReEnterExitSeconds;
     this.stateCache = false;
 
@@ -268,7 +270,7 @@ function PeopleAccessory(log, config, platform) {
 
     this.initStateCache();
 
-    if(this.pingInterval > -1) {
+    if(this.checkInterval > -1) {
         this.ping();
     }
 }
@@ -324,11 +326,11 @@ PeopleAccessory.prototype.ping = function() {
                     this.setNewState(newState);
                 }
             }
-            setTimeout(PeopleAccessory.prototype.ping.bind(this), this.pingInterval);
+            setTimeout(PeopleAccessory.prototype.ping.bind(this), this.checkInterval);
         }.bind(this));
     }
     else {
-        setTimeout(PeopleAccessory.prototype.ping.bind(this), this.pingInterval);
+        setTimeout(PeopleAccessory.prototype.ping.bind(this), this.checkInterval);
     }
 }
 
