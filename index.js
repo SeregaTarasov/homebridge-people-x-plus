@@ -273,8 +273,12 @@ function PeopleAccessory(log, config, platform) {
 
     this.initStateCache();
 
-    if(this.checkInterval > -1) {
+    if((this.checkInterval > -1) && !(this.isMacAddress)) {
         this.ping();
+    }
+
+    if((this.checkInterval > -1) && (this.isMacAddress)) {
+        this.arp();
     }
 }
 
@@ -334,6 +338,27 @@ PeopleAccessory.prototype.ping = function() {
     }
     else {
         setTimeout(PeopleAccessory.prototype.ping.bind(this), this.checkInterval);
+    }
+}
+
+PeopleAccessory.prototype.arp = function() {
+    if(this.webhookIsOutdated()) {
+        /*ping.sys.probe(this.target, function(state){
+            if(this.webhookIsOutdated()) {
+                if (state) {
+                    this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
+                }
+                if(this.successfulPingOccurredAfterWebhook()) {
+                    var newState = this.isActive();
+                    this.setNewState(newState);
+                }
+            }
+            setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
+        }.bind(this));*/
+        this.log('hello world');
+    }
+    else {
+        setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
     }
 }
 
