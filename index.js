@@ -343,28 +343,30 @@ PeopleAccessory.prototype.ping = function() {
 
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
-        arp.table(function(err, entry) {
-            if (!!err) return this.log('arp: ' + err.message);
-            if (!entry) return;
-          
-            this.log('macs: %s', entry.mac);
-            //tbl.ipaddrs[entry.ip] = entry.mac;
-            //if (!tbl.ifnames[entry.ifname]) tbl.ifnames[entry.ifname] = {};
-            //tbl.ifnames[entry.ifname][entry.mac] = entry.ip;
-        });
-        /*ping.sys.probe(this.target, function(state){
+
+        var macAddressFound = false;
+        arp.table(function(error, entry) {
             if(this.webhookIsOutdated()) {
-                if (state) {
-                    this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
-                }
-                if(this.successfulPingOccurredAfterWebhook()) {
-                    var newState = this.isActive();
-                    this.setNewState(newState);
+                if(error) {
+                    this.log('ARP Error: %s', error.message);
+                } else {
+                    if (entry) {
+                        if(entry.mac == this.target.toLowerCase()) {
+                            macAddressFound = true;
+                            this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
+                            
+                            console.log(this.target.toLowerCase());
+                            console.log(entry.mac);
+                        }
+                    }
+                    if(this.successfulPingOccurredAfterWebhook()) {
+                        var newState = this.isActive();
+                        this.setNewState(newState);
+                    }
                 }
             }
             setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
-        }.bind(this));*/
-        this.log('hello world');
+        }.bind(this));
     }
     else {
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
