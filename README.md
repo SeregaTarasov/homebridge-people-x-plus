@@ -21,23 +21,26 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
         "threshold" : 15,
         "anyoneSensor" : true,
         "nooneSensor" : false,
+        "webhookEnabled" : false,
         "webhookPort": 51828,
         "cacheDirectory": "./.node-persist/storage",
-        "pingInterval": 10000,
+        "checkInterval": 10000,
         "ignoreReEnterExitSeconds": 0,
         "people" : [
             {
                 "name" : "Pete",
                 "target" : "PetesiPhone",
                 "threshold" : 15,
-                "pingInterval": 10000,
+                "checkInterval": 10000,
+                "isMacAddress": false,
                 "ignoreReEnterExitSeconds": 0
             },
             {
                 "name" : "Someone Else",
                 "target" : "192.168.1.68",
                 "threshold" : 15,
-                "pingInterval": 10000,
+                "checkInterval": 10000,
+                "isMacAddress": false,
                 "ignoreReEnterExitSeconds": 0
             }
         ]
@@ -50,15 +53,16 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
 | `threshold`                | optional, in minutes, default: 15                                                                                                                                                            |
 | `anyoneSensor`             | optional, default: true                                                                                                                                                                      |
 | `nooneSensor`              | optional, default: false                                                                                                                                                                     |
+| `webhookEnabled`              | optional, default: true                                                                                                                                                                     |
 | `webhookPort`              | optional, default: 51828                                                                                                                                                                     |
 | `cacheDirectory`           | optional, default: "./.node-persist/storage"                                                                                                                                                 |
-| `pingInterval`             | optional, in milliseconds, default: 10000, if set to -1 than the ping mechanism will not be used                                                                                             |
+| `checkInterval`             | optional, in milliseconds, default: 10000, if set to -1 than the check mechanism will not be used                                                                                             |
 | `ignoreReEnterExitSeconds` | optional, in minutes, default: 0, if set to 0 than every enter/exit will trigger state change otherwise the state will only change if no re-enter/exit occurs in specified number of seconds |
 | `target`                   | may be either a hostname or IP address                                                                                                                                                       |
 | `name`                     | a human-readable name for your sensor                                                                                                                                                        |
 
 # How it works
-* When started homebridge-people will continually ping the IP address associated with each person defined in config.json if `pingInterval` is not set to `-1`.
+* When started homebridge-people will continually ping the IP address associated with each person defined in config.json if `checkInterval` is not set to `-1`.
 * With an iBeacon or geofencing smartphone app, you can configure a HTTP push to trigger when you enter and exit your 'home' region. This data will be combined with the ping functionality if used to give this plugin more precise presence data.
 * When a ping is successful the current timestamp is logged to a file (seen.db.json)
 * When a Homekit enabled app looks up the state of a person, the last seen time for that persons device is compared to the current time minus ```threshold``` minutes, and if it is greater assumes that the person is active.

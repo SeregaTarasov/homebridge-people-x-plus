@@ -31,6 +31,7 @@ function PeoplePlatform(log, config){
     this.threshold = config['threshold'] || 15;
     this.anyoneSensor = ((typeof(config['anyoneSensor']) != "undefined" && config['anyoneSensor'] !== null)?config['anyoneSensor']:true);
     this.nooneSensor = ((typeof(config['nooneSensor']) != "undefined" && config['nooneSensor'] !== null)?config['nooneSensor']:true);
+    this.webhookEnabled = ((typeof(config['webhookEnabled']) != "undefined" && config['webhookEnabled'] !== null)?config['webhookEnabled']:true);
     this.webhookPort = config["webhookPort"] || 51828;
     this.cacheDirectory = config["cacheDirectory"] || HomebridgeAPI.user.persistPath();
     this.checkInterval = config["checkInterval"] || 10000;
@@ -61,7 +62,9 @@ PeoplePlatform.prototype = {
         }
         callback(this.accessories);
 
-        this.startServer();
+        if(this.webhookEnabled) {
+            this.startServer();
+        }
     },
 
     startServer: function() {
@@ -171,7 +174,7 @@ function PeopleAccessory(log, config, platform) {
     this.platform = platform;
     this.threshold = config['threshold'] || this.platform.threshold;
     this.checkInterval = config['checkInterval'] || this.platform.checkInterval;
-    this.isMacAddress = config['isMacAddress'];
+    this.isMacAddress = ((typeof(config['isMacAddress']) != "undefined" && config['isMacAddress'] !== null)?config['isMacAddress']:false);
     this.ignoreReEnterExitSeconds = config['ignoreReEnterExitSeconds'] || this.platform.ignoreReEnterExitSeconds;
     this.stateCache = false;
 
