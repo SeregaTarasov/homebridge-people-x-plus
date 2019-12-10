@@ -343,6 +343,15 @@ PeopleAccessory.prototype.ping = function() {
 
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
+        arp.table(function(err, entry) {
+            if (!!err) return this.log('arp: ' + err.message);
+            if (!entry) return;
+          
+            this.log('macs: %s', entry.mac);
+            //tbl.ipaddrs[entry.ip] = entry.mac;
+            //if (!tbl.ifnames[entry.ifname]) tbl.ifnames[entry.ifname] = {};
+            //tbl.ifnames[entry.ifname][entry.mac] = entry.ip;
+        });
         /*ping.sys.probe(this.target, function(state){
             if(this.webhookIsOutdated()) {
                 if (state) {
