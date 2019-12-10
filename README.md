@@ -1,6 +1,6 @@
 **NOTE: Since version 0.5 the configuration changed to platform. You must fix your configuration to match the new configuration format.**
 ***
-# homebridge-people-x
+# homebridge-people-x-plus
 This is a plugin for [homebridge](https://github.com/nfarina/homebridge). It monitors who is at home, based on their smartphone being seen on the network recently.
 If you use the EVE.app you can also see the presence history of every person-sensor (powered by fakegato) 
 
@@ -17,7 +17,7 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
 ```
 "platforms": [
     {
-        "platform": "PeopleX",
+        "platform": "PeopleXPlus",
         "threshold" : 15,
         "anyoneSensor" : true,
         "nooneSensor" : false,
