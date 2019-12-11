@@ -351,6 +351,7 @@ PeopleAccessory.prototype.arp = function() {
                 } else {
                     if (entry) {
                         if(entry.mac == this.target.toLowerCase()) {
+                            this.log('Mac Address: %s', this.target.toLowerCase());
                             this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
                         }
                     }
