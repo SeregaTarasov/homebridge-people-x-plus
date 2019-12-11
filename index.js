@@ -356,17 +356,14 @@ PeopleAccessory.prototype.arp = function() {
                         }
                     }
                 }
+                if(this.successfulPingOccurredAfterWebhook()) {
+                    var newState = this.isActive();
+                    this.log('New State: %s', newState);
+                    this.setNewState(newState);
+                }                
             }
         }.bind(this));
-
-        if(this.successfulPingOccurredAfterWebhook()) {
-            var newState = this.isActive();
-            this.log('New State: %s', newState);
-            this.setNewState(newState);
-        }
-
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
-
     } else {
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
     }
