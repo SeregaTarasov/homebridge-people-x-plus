@@ -367,9 +367,7 @@ PeopleAccessory.prototype.arp = function() {
 
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
 
-        }
-    }
-    else {
+    } else {
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
     }
 }
