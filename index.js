@@ -354,20 +354,25 @@ PeopleAccessory.prototype.arp = function() {
                         if(entry.mac == this.target.toLowerCase()) {
 
                             macAlreadyFound = true;
-                            this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
-                            
-                            console.log(this.target.toLowerCase());
                             console.log(entry.mac);
                         }
                     }
-                    if(this.successfulPingOccurredAfterWebhook()) {
-                        var newState = this.isActive();
-                        this.setNewState(newState);
-                    }
+
                 }
             }
-            setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
         }.bind(this));
+
+        if(macAddressFound) {
+            this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
+            console.log('HIT macAddressFound: %s', this.target.toLowerCase());
+        }
+
+        if(this.successfulPingOccurredAfterWebhook()) {
+            var newState = this.isActive();
+            this.setNewState(newState);
+        }
+
+        setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
     }
     else {
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
