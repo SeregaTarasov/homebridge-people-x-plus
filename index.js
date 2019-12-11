@@ -438,7 +438,7 @@ PeopleAccessory.prototype.getServices = function() {
 
 PeopleAccessory.prototype.macAddressIsFound = function() {
     arp.table(function(error, entry) {
-        if((this.webhookIsOutdated()) {
+        if(this.webhookIsOutdated()) {
             if(error) {
                 this.log('ARP Error: %s', error.message);
             } else {
