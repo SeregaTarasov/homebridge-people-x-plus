@@ -362,9 +362,12 @@ PeopleAccessory.prototype.arp = function() {
             }
         }.bind(this));
 
+        this.log('macAddressFound status: %s', macAddressFound);
         if(macAddressFound) {
             this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
             console.log('HIT macAddressFound: %s', this.target.toLowerCase());
+        } else {
+            this.log('not found');
         }
 
         if(this.successfulPingOccurredAfterWebhook()) {
