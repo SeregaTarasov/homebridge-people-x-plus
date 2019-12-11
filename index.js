@@ -355,6 +355,7 @@ PeopleAccessory.prototype.arp = function() {
 
                             macAddressFound = true;
                             console.log(entry.mac);
+                            this.log('macAddressFound status 1: %s', macAddressFound);
                         }
                     }
 
@@ -362,7 +363,7 @@ PeopleAccessory.prototype.arp = function() {
             }
         }.bind(this));
 
-        this.log('macAddressFound status: %s', macAddressFound);
+        this.log('macAddressFound status 2: %s', macAddressFound);
         if(macAddressFound) {
             this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
             console.log('HIT macAddressFound: %s', this.target.toLowerCase());
