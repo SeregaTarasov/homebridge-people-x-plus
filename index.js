@@ -343,7 +343,6 @@ PeopleAccessory.prototype.ping = function() {
 
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
-
         arp.table(function(error, entry) {
             if(this.webhookIsOutdated()) {
                 if(error) {
@@ -355,15 +354,15 @@ PeopleAccessory.prototype.arp = function() {
                             this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
                         }
                     }
-                }
-                if(this.successfulPingOccurredAfterWebhook()) {
-                    var newState = this.isActive();
-                    this.log('lastSuccessfulPing_' + this.target);
-                    this.log('New State: %s', newState);
-                    this.setNewState(newState);
-                }                
+                }             
             }
         }.bind(this));
+        if(this.successfulPingOccurredAfterWebhook()) {
+            var newState = this.isActive();
+            this.log('lastSuccessfulPing_' + this.target);
+            this.log('New State: %s', newState);
+            this.setNewState(newState);
+        }
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
     } else {
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
