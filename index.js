@@ -352,7 +352,7 @@ PeopleAccessory.prototype.arp = function() {
                     if (entry) {
                         if(entry.mac == this.target.toLowerCase()) {
                             this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
-                            this.log('HIT macAddressFound 2: %s', this.target.toLowerCase());
+                            this.log('HIT macAddressFound 1: %s', this.target.toLowerCase());
                         }
                     }
                 }
@@ -360,7 +360,7 @@ PeopleAccessory.prototype.arp = function() {
         }.bind(this));
 
         if(this.successfulPingOccurredAfterWebhook()) {
-            this.log('HIT macAddressFound 1: %s', status);
+            this.log('HIT successfulPingOccurredAfterWebhook: %s', this.target.toLowerCase());
             var newState = this.isActive();
             this.setNewState(newState);
         }
