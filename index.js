@@ -344,24 +344,30 @@ PeopleAccessory.prototype.ping = function() {
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
 
-        this.macAddressIsFound().then(status => function() {
+        arp.table(function(error, entry) {
+            if(this.webhookIsOutdated()) {
+                if(error) {
+                    this.log('ARP Error: %s', error.message);
+                } else {
+                    if (entry) {
+                        if(entry.mac == this.target.toLowerCase()) {
+                            this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
+                            this.log('HIT macAddressFound 2: %s', this.target.toLowerCase());
+                        }
+                    }
+                }
+            }
+        }.bind(this));
 
+        if(this.successfulPingOccurredAfterWebhook()) {
             this.log('HIT macAddressFound 1: %s', status);
+            var newState = this.isActive();
+            this.setNewState(newState);
+        }
 
-            if(status) {
-                this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
-                this.log('HIT macAddressFound 2: %s', this.target.toLowerCase());
-            }
-    
-            if(this.successfulPingOccurredAfterWebhook()) {
-                var newState = this.isActive();
-                this.setNewState(newState);
-            }
-    
-            setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
+        setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
 
-            }
-        );
+        }
     }
     else {
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
@@ -439,23 +445,6 @@ PeopleAccessory.prototype.getServices = function() {
 
     return servicesList;
 
-}
-
-PeopleAccessory.prototype.macAddressIsFound = function() {
-    arp.table(function(error, entry) {
-        if(this.webhookIsOutdated()) {
-            if(error) {
-                this.log('ARP Error: %s', error.message);
-            } else {
-                if (entry) {
-                    if(entry.mac == this.target.toLowerCase()) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }.bind(this));
 }
 
 // #######################
