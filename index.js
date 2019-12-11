@@ -344,11 +344,11 @@ PeopleAccessory.prototype.ping = function() {
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
 
-        console.log('HIT macAddressFound 1: %s', this.macAddressIsFound());
+        this.log('HIT macAddressFound 1: %s', this.macAddressIsFound());
 
         if(this.macAddressIsFound()) {
             this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
-            console.log('HIT macAddressFound 2: %s', this.target.toLowerCase());
+            this.log('HIT macAddressFound 2: %s', this.target.toLowerCase());
         }
 
         if(this.successfulPingOccurredAfterWebhook()) {
