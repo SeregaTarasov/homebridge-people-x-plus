@@ -345,30 +345,10 @@ PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
 
         var macAddressFound = false;
-        arp.table(function(error, entry) {
-            if((this.webhookIsOutdated()) && !(macAddressFound)) {
-                if(error) {
-                    this.log('ARP Error: %s', error.message);
-                } else {
-                    if (entry) {
-                        if(entry.mac == this.target.toLowerCase()) {
 
-                            macAddressFound = true;
-                            console.log(entry.mac);
-                            this.log('macAddressFound status 1: %s', macAddressFound);
-                        }
-                    }
-
-                }
-            }
-        }.bind(this));
-
-        this.log('macAddressFound status 2: %s', macAddressFound);
-        if(macAddressFound) {
+        if(this.macAddressIsFound()) {
             this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
             console.log('HIT macAddressFound: %s', this.target.toLowerCase());
-        } else {
-            this.log('not found');
         }
 
         if(this.successfulPingOccurredAfterWebhook()) {
@@ -454,6 +434,28 @@ PeopleAccessory.prototype.getServices = function() {
 
     return servicesList;
 
+}
+
+PeopleAccessory.prototype.macAddressIsFound = function() {
+
+    var macAddressFound = false;
+    arp.table(function(error, entry) {
+        if((this.webhookIsOutdated()) && !(macAddressFound)) {
+            if(error) {
+                this.log('ARP Error: %s', error.message);
+            } else {
+                if (entry) {
+                    if(entry.mac == this.target.toLowerCase()) {
+
+                        macAddressFound = true;
+                        console.log(entry.mac);
+                        this.log('macAddressFound status 1: %s', macAddressFound);
+                    }
+                }
+            }
+        }
+        return macAddressFound;
+    }.bind(this));
 }
 
 // #######################
