@@ -344,19 +344,24 @@ PeopleAccessory.prototype.ping = function() {
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
 
-        this.log('HIT macAddressFound 1: %s', this.macAddressIsFound());
+        this.macAddressIsFound().then(status => function() {
 
-        if(this.macAddressIsFound()) {
-            this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
-            this.log('HIT macAddressFound 2: %s', this.target.toLowerCase());
-        }
+            this.log('HIT macAddressFound 1: %s', status);
 
-        if(this.successfulPingOccurredAfterWebhook()) {
-            var newState = this.isActive();
-            this.setNewState(newState);
-        }
+            if(status) {
+                this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
+                this.log('HIT macAddressFound 2: %s', this.target.toLowerCase());
+            }
+    
+            if(this.successfulPingOccurredAfterWebhook()) {
+                var newState = this.isActive();
+                this.setNewState(newState);
+            }
+    
+            setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
 
-        setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
+            }
+        );
     }
     else {
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
