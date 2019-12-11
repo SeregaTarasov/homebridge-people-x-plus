@@ -344,16 +344,16 @@ PeopleAccessory.prototype.ping = function() {
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
 
-        var macAlreadyFound = false;
+        var macAddressFound = false;
         arp.table(function(error, entry) {
-            if((this.webhookIsOutdated()) && !(macAlreadyFound)) {
+            if((this.webhookIsOutdated()) && !(macAddressFound)) {
                 if(error) {
                     this.log('ARP Error: %s', error.message);
                 } else {
                     if (entry) {
                         if(entry.mac == this.target.toLowerCase()) {
 
-                            macAlreadyFound = true;
+                            macAddressFound = true;
                             console.log(entry.mac);
                         }
                     }
