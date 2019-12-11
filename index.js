@@ -358,6 +358,7 @@ PeopleAccessory.prototype.arp = function() {
                 }
                 if(this.successfulPingOccurredAfterWebhook()) {
                     var newState = this.isActive();
+                    this.log('lastSuccessfulPing_' + this.target);
                     this.log('New State: %s', newState);
                     this.setNewState(newState);
                 }                
