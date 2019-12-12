@@ -350,7 +350,6 @@ PeopleAccessory.prototype.arp = function() {
                 } else {
                     if (entry) {
                         if(entry.mac == this.target.toLowerCase()) {
-                            this.log('Mac Address: %s', this.target.toLowerCase());
                             this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
                         }
                     }
@@ -359,8 +358,6 @@ PeopleAccessory.prototype.arp = function() {
         }.bind(this));
         if(this.successfulPingOccurredAfterWebhook()) {
             var newState = this.isActive();
-            this.log('lastSuccessfulPing_' + this.target);
-            this.log('New State: %s', newState);
             this.setNewState(newState);
         }
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
