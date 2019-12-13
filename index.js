@@ -345,6 +345,7 @@ PeopleAccessory.prototype.ping = function() {
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
         ping.sys.probe(this.target, function(state){
+            this.log('ping state: %s', state);
             arp.table(function(error, entry) {
                 if(this.webhookIsOutdated()) {
                     if(error) {
