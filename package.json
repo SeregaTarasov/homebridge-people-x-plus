@@ -17,7 +17,7 @@
     "moment": "^2.11.2",
     "node-persist": "2.1.0",
     "ping": "^0.1.10",
-    "arp-a": "^0.5.3",
+    "arp-a-x": "^0.5.3",
     "request": "^2.79.0",
     "fakegato-history": "^0.5.0"
   }
