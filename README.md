@@ -30,17 +30,19 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
             {
                 "name" : "Pete",
                 "target" : "PetesiPhone",
+                "macAddress" : "de:ef:38:29:0c:28",
                 "threshold" : 15,
                 "checkInterval": 10000,
-                "isMacAddress": false,
+                "useArp": true,
                 "ignoreReEnterExitSeconds": 0
             },
             {
                 "name" : "Someone Else",
                 "target" : "192.168.1.68",
+                "macAddress" : "64:2e:fb:8b:41:7b",
                 "threshold" : 15,
                 "checkInterval": 10000,
-                "isMacAddress": false,
+                "useArp": true,
                 "ignoreReEnterExitSeconds": 0
             }
         ]
@@ -53,12 +55,14 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
 | `threshold`                | optional, in minutes, default: 15                                                                                                                                                            |
 | `anyoneSensor`             | optional, default: true                                                                                                                                                                      |
 | `nooneSensor`              | optional, default: false                                                                                                                                                                     |
-| `webhookEnabled`              | optional, default: true                                                                                                                                                                     |
+| `webhookEnabled`           | optional, default: true                                                                                                                                                                      |
+| `useArp`                   | optional, default: false                                                                                                                                                                     |
 | `webhookPort`              | optional, default: 51828                                                                                                                                                                     |
 | `cacheDirectory`           | optional, default: "./.node-persist/storage"                                                                                                                                                 |
-| `checkInterval`             | optional, in milliseconds, default: 10000, if set to -1 than the check mechanism will not be used                                                                                             |
+| `checkInterval`            | optional, in milliseconds, default: 10000, if set to -1 than the check mechanism will not be used                                                                                            |
 | `ignoreReEnterExitSeconds` | optional, in minutes, default: 0, if set to 0 than every enter/exit will trigger state change otherwise the state will only change if no re-enter/exit occurs in specified number of seconds |
 | `target`                   | may be either a hostname or IP address                                                                                                                                                       |
+| `macAddress`               | optional (if useArp set to false), mac address of the device                                                                                                                                 |
 | `name`                     | a human-readable name for your sensor                                                                                                                                                        |
 
 # How it works
@@ -97,7 +101,8 @@ On some docker-environments (alpine-based for example) it is possible that the p
 
 # Thanks
 Thanks to everyone who's helped contribute code, feedback and support.  In particular:
-* [PeteLawrence](https://github.com/PeteLawrence/homebridge-people) - for the plugin which this one is forked from
+* [PeteLawrence](https://github.com/PeteLawrence/homebridge-people) - for the original plugin
+* [skrollme](https://github.com/skrollme/homebridge-people-x) - for the plugin which this one is forked from
 * [simont77](https://github.com/simont77/fakegato-history) - for the fakegato-plugin
 * [wr](https://github.com/wr) - for adding in webhook support.
 * [benzman81](https://github.com/benzman81) - for porting the plugin over to be a Platform and improving how ping and webhooks work together, and numerous other fixes.
