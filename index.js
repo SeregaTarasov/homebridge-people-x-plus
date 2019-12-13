@@ -1,5 +1,5 @@
 var ping = require('ping');
-var arp = require('arp-a');
+var arp = require('arp-a-x');
 var moment = require('moment');
 var request = require("request");
 var http = require('http');
