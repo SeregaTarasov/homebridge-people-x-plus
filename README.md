@@ -70,6 +70,7 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
 * With an iBeacon or geofencing smartphone app, you can configure a HTTP push to trigger when you enter and exit your 'home' region. This data will be combined with the ping functionality if used to give this plugin more precise presence data.
 * When a ping is successful the current timestamp is logged to a file (seen.db.json)
 * When a Homekit enabled app looks up the state of a person, the last seen time for that persons device is compared to the current time minus ```threshold``` minutes, and if it is greater assumes that the person is active.
+* When a `useArp` is set to `true` monitoring will be done based on the ARP table. Using ARP makes the monitoring of mobile devices more accurate as they are not always connected to the network and allows to reduce the `threshold` to a much lower value.
 
 # 'Anyone' and 'No One' sensors
 Some HomeKit automations need to happen when "anyone" is home or when "no one" is around, but the default Home app makes this difficult. homebridge-people can automatically create additional sensors called "Anyone" and "No One" to make these automations very easy.
