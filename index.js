@@ -171,10 +171,11 @@ function PeopleAccessory(log, config, platform) {
     this.log = log;
     this.name = config['name'];
     this.target = config['target'];
+    this.macAddress = config['macAddress'];
     this.platform = platform;
     this.threshold = config['threshold'] || this.platform.threshold;
     this.checkInterval = config['checkInterval'] || this.platform.checkInterval;
-    this.isMacAddress = ((typeof(config['isMacAddress']) != "undefined" && config['isMacAddress'] !== null)?config['isMacAddress']:false);
+    this.useArp = ((typeof(config['useArp']) != "undefined" && config['useArp'] !== null)?config['useArp']:false);
     this.ignoreReEnterExitSeconds = config['ignoreReEnterExitSeconds'] || this.platform.ignoreReEnterExitSeconds;
     this.stateCache = false;
 
@@ -273,11 +274,11 @@ function PeopleAccessory(log, config, platform) {
 
     this.initStateCache();
 
-    if((this.checkInterval > -1) && !(this.isMacAddress)) {
+    if((this.checkInterval > -1) && !(this.useArp)) {
         this.ping();
     }
 
-    if((this.checkInterval > -1) && (this.isMacAddress)) {
+    if((this.checkInterval > -1) && (this.useArp)) {
         this.arp();
     }
 }
@@ -343,24 +344,26 @@ PeopleAccessory.prototype.ping = function() {
 
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
-        arp.table(function(error, entry) {
-            if(this.webhookIsOutdated()) {
-                if(error) {
-                    this.log('ARP Error: %s', error.message);
-                } else {
-                    if (entry) {
-                        if(entry.mac == this.target.toLowerCase()) {
-                            this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
+        ping.sys.probe(this.target, function(state){
+            arp.table(function(error, entry) {
+                if(this.webhookIsOutdated()) {
+                    if(error) {
+                        this.log('ARP Error: %s', error.message);
+                    } else {
+                        if (entry) {
+                            if(entry.mac == this.macAddress.toLowerCase()) {
+                                this.platform.storage.setItemSync('lastSuccessfulPing_' + this.macAddress, Date.now());
+                            }
                         }
-                    }
-                }             
+                    }             
+                }
+            }.bind(this));
+            if(this.successfulPingOccurredAfterWebhook()) {
+                var newState = this.isActive();
+                this.setNewState(newState);
             }
+            setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
         }.bind(this));
-        if(this.successfulPingOccurredAfterWebhook()) {
-            var newState = this.isActive();
-            this.setNewState(newState);
-        }
-        setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
     } else {
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
     }
