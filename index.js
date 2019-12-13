@@ -354,7 +354,7 @@ PeopleAccessory.prototype.arp = function() {
                         if (entry) {
                             if(entry.mac == this.macAddress.toLowerCase()) {
                                 this.log('FOUND: mac address: %s', entry.mac);
-                                this.platform.storage.setItemSync('lastSuccessfulPing_' + this.macAddress, Date.now());
+                                this.platform.storage.setItemSync('lastSuccessfulPing_' + this.target, Date.now());
                             } else {
                                 this.log('NOT FOUND: mac address: %s', entry.mac);
                             }
