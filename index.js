@@ -353,7 +353,10 @@ PeopleAccessory.prototype.arp = function() {
                     } else {
                         if (entry) {
                             if(entry.mac == this.macAddress.toLowerCase()) {
+                                this.log('FOUND: mac address: %s', entry.mac);
                                 this.platform.storage.setItemSync('lastSuccessfulPing_' + this.macAddress, Date.now());
+                            } else {
+                                this.log('NOT FOUND: mac address: %s', entry.mac);
                             }
                         }
                     }             
