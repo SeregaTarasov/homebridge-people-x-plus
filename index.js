@@ -344,8 +344,9 @@ PeopleAccessory.prototype.ping = function() {
 
 PeopleAccessory.prototype.arp = function() {
     if(this.webhookIsOutdated()) {
-        ping.sys.probe(this.target, function(state){
-            this.log('ping state: %s', state);
+        //ping.sys.probe(this.target, function(state){
+            //this.log('ping state: %s', state);#
+            this.log('=======');
             arp.table(function(error, entry) {
                 if(this.webhookIsOutdated()) {
                     if(error) {
@@ -364,7 +365,7 @@ PeopleAccessory.prototype.arp = function() {
                 this.setNewState(newState);
             }
             setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
-        }.bind(this));
+        //}.bind(this));
     } else {
         setTimeout(PeopleAccessory.prototype.arp.bind(this), this.checkInterval);
     }
