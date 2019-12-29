@@ -21,6 +21,10 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
         "threshold" : 15,
         "anyoneSensor" : true,
         "nooneSensor" : false,
+        "guestSensor" : false,
+        "anyoneSensorName" : "Anyone",
+        "nooneSensorName" : "No One",
+        "guestSensorName" : "Guests",
         "webhookEnabled" : false,
         "webhookPort": 51828,
         "cacheDirectory": "./.node-persist/storage",
@@ -43,8 +47,19 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
                 "threshold" : 15,
                 "checkInterval": 10000,
                 "useArp": true,
+                "statusOnly": true,
                 "ignoreReEnterExitSeconds": 0
-            }
+            },
+            {
+                "name" : "Some Guest",
+                "target" : "192.168.1.70",
+                "macAddress" : "64:2e:fb:8b:50:8a",
+                "threshold" : 15,
+                "checkInterval": 10000,
+                "useArp": true,
+                "isGuest": true,
+                "ignoreReEnterExitSeconds": 0
+            }        
         ]
     }
 ]
@@ -55,8 +70,14 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
 | `threshold`                | optional, in minutes, default: 15                                                                                                                                                            |
 | `anyoneSensor`             | optional, default: true                                                                                                                                                                      |
 | `nooneSensor`              | optional, default: false                                                                                                                                                                     |
+| `guestSensor`              | optional, default: false                                                                                                                                                                     |
+| `anyoneSensorName`         | optional, default: "Anyone"                                                                                                                                                                      |
+| `nooneSensorName`          | optional, default: "No One"                                                                                                                                                                     |
+| `guestSensorName`          | optional, default: "Guests"                                                                                                                                                                     |
 | `webhookEnabled`           | optional, default: true                                                                                                                                                                      |
 | `useArp`                   | optional, default: false                                                                                                                                                                     |
+| `isGuest`                  | optional, default: false                                                                                                                                                                     |
+| `statusOnly`               | optional, default: false                                                                                                                                                                     |
 | `webhookPort`              | optional, default: 51828                                                                                                                                                                     |
 | `cacheDirectory`           | optional, default: "./.node-persist/storage"                                                                                                                                                 |
 | `checkInterval`            | optional, in milliseconds, default: 10000, if set to -1 than the check mechanism will not be used                                                                                            |
@@ -70,7 +91,9 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
 * With an iBeacon or geofencing smartphone app, you can configure a HTTP push to trigger when you enter and exit your 'home' region. This data will be combined with the ping functionality if used to give this plugin more precise presence data.
 * When a ping is successful the current timestamp is logged to a file (seen.db.json)
 * When a Homekit enabled app looks up the state of a person, the last seen time for that persons device is compared to the current time minus ```threshold``` minutes, and if it is greater assumes that the person is active.
-* When a `useArp` is set to `true` monitoring will be done based on the ARP table. Using ARP makes the monitoring of mobile devices more accurate as they are not always connected to the network and allows to reduce the `threshold` to a much lower value.
+* When `useArp` is set to `true`, monitoring will be done based on the ARP table. Using ARP makes the monitoring of mobile devices more accurate as they are not always connected to the network and allows to reduce the `threshold` to a much lower value.
+* When `isGuest` is set to `true`, the monitored device will be handled as a Guest-device and will toggle the Guest-sensor accordingly, only when Guests are active.
+* When `statusOnly` is set to `true`, the monitored device will not be included in the status of the 'Anyone', 'No One' and 'Guest' sensors, but only shows status.
 
 # 'Anyone' and 'No One' sensors
 Some HomeKit automations need to happen when "anyone" is home or when "no one" is around, but the default Home app makes this difficult. homebridge-people can automatically create additional sensors called "Anyone" and "No One" to make these automations very easy.
@@ -78,6 +101,11 @@ Some HomeKit automations need to happen when "anyone" is home or when "no one" i
 For example, you might want to run your "Arrive Home" scene when _Anyone_ gets home. Or run "Leave Home" when _No One_ is home.
 
 These sensors can be enabled by adding `"anyoneSensor" : true` and `"nooneSensor" : true` to your homebridge `config.json` file.
+
+# 'Guest' sensor
+The Guest-sensor shows when "no one" is around and only Guests are active.
+
+This sensor can be enabled by adding `"guestSensor" : true` to your homebridge `config.json` file.
 
 # Accuracy
 This plugin requires that the devices being monitored are connected to the network. iPhones (and I expect others) deliberately disconnect from the network once the screen is turned off to save power, meaning just because the device isn't connected, it doesn't mean that the devices owner isn't at home. Fortunately, iPhones (and I expect others) periodically reconnect to the network to check for updates, emails, etc. This plugin works by keeping track of the last time a device was seen, and comparing that to a threshold value (in minutes).
