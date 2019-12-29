@@ -5,8 +5,6 @@ var request = require("request");
 var http = require('http');
 var url = require('url');
 var DEFAULT_REQUEST_TIMEOUT = 10000;
-var SENSOR_ANYONE = 'Anyone';
-var SENSOR_NOONE = 'No One';
 var FakeGatoHistoryService;
 const EPOCH_OFFSET = 978307200;
 
@@ -29,8 +27,12 @@ module.exports = function(homebridge) {
 function PeoplePlatform(log, config){
     this.log = log;
     this.threshold = config['threshold'] || 15;
+    this.anyoneSensorName = ((typeof(config['anyoneSensorName']) != "undefined" && config['anyoneSensorName'] !== null)?config['anyoneSensorName']:'Anyone');
+    this.nooneSensorName = ((typeof(config['nooneSensorName']) != "undefined" && config['nooneSensorName'] !== null)?config['nooneSensorName']:'No One');
+    this.guestSensorName = ((typeof(config['guestSensorName']) != "undefined" && config['guestSensorName'] !== null)?config['guestSensorName']:'Guests');
     this.anyoneSensor = ((typeof(config['anyoneSensor']) != "undefined" && config['anyoneSensor'] !== null)?config['anyoneSensor']:true);
     this.nooneSensor = ((typeof(config['nooneSensor']) != "undefined" && config['nooneSensor'] !== null)?config['nooneSensor']:true);
+    this.guestSensor = ((typeof(config['guestSensor']) != "undefined" && config['guestSensor'] !== null)?config['guestSensor']:true);
     this.webhookEnabled = ((typeof(config['webhookEnabled']) != "undefined" && config['webhookEnabled'] !== null)?config['webhookEnabled']:true);
     this.webhookPort = config["webhookPort"] || 51828;
     this.cacheDirectory = config["cacheDirectory"] || HomebridgeAPI.user.persistPath();
@@ -53,12 +55,16 @@ PeoplePlatform.prototype = {
             this.peopleAccessories.push(peopleAccessory);
         }
         if(this.anyoneSensor) {
-            this.peopleAnyOneAccessory = new PeopleAllAccessory(this.log, SENSOR_ANYONE, this);
+            this.peopleAnyOneAccessory = new PeopleAllAccessory(this.log, this.anyoneSensorName, this);
             this.accessories.push(this.peopleAnyOneAccessory);
         }
         if(this.nooneSensor) {
-            this.peopleNoOneAccessory = new PeopleAllAccessory(this.log, SENSOR_NOONE, this);
+            this.peopleNoOneAccessory = new PeopleAllAccessory(this.log, this.nooneSensorName, this);
             this.accessories.push(this.peopleNoOneAccessory);
+        }
+        if(this.guestSensor) {
+            this.peopleGuestAccessory = new PeopleAllAccessory(this.log, this.guestSensorName, this);
+            this.accessories.push(this.peopleGuestAccessory);
         }
         callback(this.accessories);
 
@@ -176,6 +182,8 @@ function PeopleAccessory(log, config, platform) {
     this.threshold = config['threshold'] || this.platform.threshold;
     this.checkInterval = config['checkInterval'] || this.platform.checkInterval;
     this.useArp = ((typeof(config['useArp']) != "undefined" && config['useArp'] !== null)?config['useArp']:false);
+    this.isGuest = ((typeof(config['isGuest']) != "undefined" && config['isGuest'] !== null)?config['isGuest']:false);
+    this.statusOnly = ((typeof(config['statusOnly']) != "undefined" && config['statusOnly'] !== null)?config['statusOnly']:false);
     this.ignoreReEnterExitSeconds = config['ignoreReEnterExitSeconds'] || this.platform.ignoreReEnterExitSeconds;
     this.stateCache = false;
 
@@ -407,6 +415,10 @@ PeopleAccessory.prototype.setNewState = function(newState) {
             this.platform.peopleNoOneAccessory.refreshState();
         }
 
+        if(this.platform.peopleGuestAccessory) {
+            this.platform.peopleGuestAccessory.refreshState();
+        }
+
         var lastSuccessfulPingMoment = "none";
         var lastWebhookMoment = "none";
         var lastSuccessfulPing = this.platform.storage.getItemSync('lastSuccessfulPing_' + this.target);
@@ -423,7 +435,7 @@ PeopleAccessory.prototype.setNewState = function(newState) {
                 time: moment().unix(),
                 status: (newState) ? 1 : 0
             });
-        this.log('Changed occupancy state for %s to %s. Last successful ping %s , last webhook %s .', this.target, newState, lastSuccessfulPingMoment, lastWebhookMoment);
+        this.log('Changed occupancy state for %s (%s) to %s. Last successful ping %s , last webhook %s .', this.target, this.name, newState, lastSuccessfulPingMoment, lastWebhookMoment);
     }
 }
 
@@ -457,9 +469,19 @@ function PeopleAllAccessory(log, name, platform) {
         .on('get', this.getState.bind(this));
 
     this.accessoryService = new Service.AccessoryInformation;
+    if(this.name === this.platform.nooneSensorName) {
+        this.serialNumber = "hps-noone";
+    }
+    else if(this.name === this.platform.guestSensorName) {
+        this.serialNumber = "hps-guest";
+    }
+    else {
+        this.serialNumber = "hps-all";
+    }
+    
     this.accessoryService
         .setCharacteristic(Characteristic.Name, this.name)
-        .setCharacteristic(Characteristic.SerialNumber, (this.name === SENSOR_NOONE)?"hps-noone":"hps-all")
+        .setCharacteristic(Characteristic.SerialNumber, this.serialNumber)
         .setCharacteristic(Characteristic.Manufacturer, "Elgato");
 }
 
@@ -474,8 +496,13 @@ PeopleAllAccessory.prototype.identify = function(callback) {
 
 PeopleAllAccessory.prototype.getStateFromCache = function() {
     var isAnyoneActive = this.getAnyoneStateFromCache();
-    if(this.name === SENSOR_NOONE) {
+    var isGuestActive = this.getGuestStateFromCache();
+    
+    if(this.name === this.platform.nooneSensorName) {
         return !isAnyoneActive;
+    }
+    else if(this.name === this.platform.guestSensorName) {
+        return !isAnyoneActive && isGuestActive;
     }
     else {
         return isAnyoneActive;
@@ -486,7 +513,21 @@ PeopleAllAccessory.prototype.getAnyoneStateFromCache = function() {
     for(var i = 0; i < this.platform.peopleAccessories.length; i++){
         var peopleAccessory = this.platform.peopleAccessories[i];
         var isActive = peopleAccessory.stateCache;
-        if(isActive) {
+        var statusOnly = peopleAccessory.statusOnly;
+        if(isActive && !statusOnly) {
+            return true;
+        }
+    }
+    return false;
+}
+
+PeopleAllAccessory.prototype.getGuestStateFromCache = function() {
+    for(var i = 0; i < this.platform.peopleAccessories.length; i++){
+        var peopleAccessory = this.platform.peopleAccessories[i];
+        var isActive = peopleAccessory.stateCache;
+        var statusOnly = peopleAccessory.statusOnly;
+        var isGuest = peopleAccessory.isGuest;
+        if(isActive && !statusOnly && isGuest) {
             return true;
         }
     }
