@@ -1,6 +1,6 @@
 {
   "name": "homebridge-people-x-plus",
-  "version": "0.7.3",
+  "version": "0.7.4",
   "description": "Homebridge plugin that provides details of who is in a Home + History (powered by fakegato) + MAC Address support",
   "keywords": [
     "homebridge-plugin"
