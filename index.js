@@ -38,6 +38,36 @@ function PeoplePlatform(log, config){
     this.cacheDirectory = config["cacheDirectory"] || HomebridgeAPI.user.persistPath();
     this.checkInterval = config["checkInterval"] || 10000;
     this.ignoreReEnterExitSeconds = config["ignoreReEnterExitSeconds"] || 0;
+    this.anyoneSensorOnURL = config["anyoneSensor_on_url"] || "";
+    this.anyoneSensorOnMethod = config["anyoneSensor_on_method"] || "GET";
+    this.anyoneSensorOnBody = config["anyoneSensor_on_body"] || "";
+    this.anyoneSensorOnForm = config["anyoneSensor_on_form"] || "";
+    this.anyoneSensorOnHeaders = config["anyoneSensor_on_headers"] || "{}";
+    this.anyoneSensorOffURL = config["anyoneSensor_off_url"] || "";
+    this.anyoneSensorOffMethod = config["anyoneSensor_off_method"] || "GET";
+    this.anyoneSensorOffBody = config["anyoneSensor_off_body"] || "";
+    this.anyoneSensorOffForm = config["anyoneSensor_off_form"] || "";
+    this.anyoneSensorOffHeaders = config["anyoneSensor_off_headers"] || "{}";
+    this.nooneSensorOnURL = config["nooneSensor_on_url"] || "";
+    this.nooneSensorOnMethod = config["nooneSensor_on_method"] || "GET";
+    this.nooneSensorOnBody = config["nooneSensor_on_body"] || "";
+    this.nooneSensorOnForm = config["nooneSensor_on_form"] || "";
+    this.nooneSensorOnHeaders = config["nooneSensor_on_headers"] || "{}";
+    this.nooneSensorOffURL = config["nooneSensor_off_url"] || "";
+    this.nooneSensorOffMethod = config["nooneSensor_off_method"] || "GET";
+    this.nooneSensorOffBody = config["nooneSensor_off_body"] || "";
+    this.nooneSensorOffForm = config["nooneSensor_off_form"] || "";
+    this.nooneSensorOffHeaders = config["nooneSensor_off_headers"] || "{}";
+    this.guestSensorOnURL = config["guestSensor_on_url"] || "";
+    this.guestSensorOnMethod = config["guestSensor_on_method"] || "GET";
+    this.guestSensorOnBody = config["guestSensor_on_body"] || "";
+    this.guestSensorOnForm = config["guestSensor_on_form"] || "";
+    this.guestSensorOnHeaders = config["guestSensor_on_headers"] || "{}";
+    this.guestSensorOffURL = config["guestSensor_off_url"] || "";
+    this.guestSensorOffMethod = config["guestSensor_off_method"] || "GET";
+    this.guestSensorOffBody = config["guestSensor_off_body"] || "";
+    this.guestSensorOffForm = config["guestSensor_off_form"] || "";
+    this.guestSensorOffHeaders = config["guestSensor_off_headers"] || "{}";
     this.people = config['people'];
     this.storage = require('node-persist');
     this.storage.initSync({dir:this.cacheDirectory});
@@ -527,6 +557,7 @@ function PeopleAllAccessory(log, name, platform) {
     else {
         this.serialNumber = "hps-all";
     }
+    this.stateCache = false;
     
     this.accessoryService
         .setCharacteristic(Characteristic.Name, this.name)
@@ -584,7 +615,94 @@ PeopleAllAccessory.prototype.getGuestStateFromCache = function() {
 }
 
 PeopleAllAccessory.prototype.refreshState = function() {
-    this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(PeopleAccessory.encodeState(this.getStateFromCache()));
+    var oldState = this.stateCache;
+    var newState = this.getStateFromCache();
+
+    this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(PeopleAccessory.encodeState(newState));
+    
+    if (oldState != newState) {
+        this.stateCache = newState;
+        
+        this.log("Changed sensor '%s' state to %s.", this.name, newState);
+        this.callHttpWebhook();
+    }
+}
+
+PeopleAllAccessory.prototype.callHttpWebhook = function() {
+    var urlToCall;
+    var urlMethod;
+    var urlBody;
+    var urlForm;
+    var urlHeaders;
+
+    if(this.name === this.platform.nooneSensorName) {
+        urlToCall = this.platform.nooneSensorOnURL;
+        urlMethod = this.platform.nooneSensorOnMethod;
+        urlBody = this.platform.nooneSensorOnBody;
+        urlForm = this.platform.nooneSensorOnForm;
+        urlHeaders = this.platform.nooneSensorOnHeaders;
+        
+        if (!this.stateCache) {
+            urlToCall = this.platform.nooneSensorOffURL;
+            urlMethod = this.platform.nooneSensorOffMethod;
+            urlBody = this.platform.nooneSensorOffBody;
+            urlForm = this.platform.nooneSensorOffForm;
+            urlHeaders = this.platform.nooneSensorOffHeaders;
+        }
+    }
+    else if(this.name === this.platform.guestSensorName) {
+        urlToCall = this.platform.guestSensorOnURL;
+        urlMethod = this.platform.guestSensorOnMethod;
+        urlBody = this.platform.guestSensorOnBody;
+        urlForm = this.platform.guestSensorOnForm;
+        urlHeaders = this.platform.guestSensorOnHeaders;
+        
+        if (!this.stateCache) {
+            urlToCall = this.platform.guestSensorOffURL;
+            urlMethod = this.platform.guestSensorOffMethod;
+            urlBody = this.platform.guestSensorOffBody;
+            urlForm = this.platform.guestSensorOffForm;
+            urlHeaders = this.platform.guestSensorOffHeaders;
+        }
+    }
+    else {
+        urlToCall = this.platform.anyoneSensorOnURL;
+        urlMethod = this.platform.anyoneSensorOnMethod;
+        urlBody = this.platform.anyoneSensorOnBody;
+        urlForm = this.platform.anyoneSensorOnForm;
+        urlHeaders = this.platform.anyoneSensorOnHeaders;
+        
+        if (!this.stateCache) {
+            urlToCall = this.platform.anyoneSensorOffURL;
+            urlMethod = this.platform.anyoneSensorOffMethod;
+            urlBody = this.platform.anyoneSensorOffBody;
+            urlForm = this.platform.anyoneSensorOffForm;
+            urlHeaders = this.platform.anyoneSensorOffHeaders;
+        }
+    }
+    
+    if (urlToCall !== "") {
+        var theRequest = {
+            method : urlMethod,
+            url : urlToCall,
+            timeout : DEFAULT_REQUEST_TIMEOUT,
+            headers: JSON.parse(urlHeaders)
+        };
+        if (urlMethod === "POST" || urlMethod === "PUT") {
+            if (urlForm) {
+                this.log("Adding Form " + urlForm);
+                theRequest.form = JSON.parse(urlForm);
+            }
+            else if (urlBody) {
+                this.log("Adding Body " + urlBody);
+                theRequest.body = urlBody;
+            }
+        }
+        request(theRequest, (function(err, response, body) {
+            var statusCode = response && response.statusCode ? response.statusCode : -1;
+            this.log("Request to '%s' finished with status code '%s' and body '%s'.", urlToCall, statusCode, body, err);
+        }).bind(this));
+    }
 }
 
 PeopleAllAccessory.prototype.getServices = function() {
