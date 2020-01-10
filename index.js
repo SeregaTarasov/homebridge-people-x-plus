@@ -185,6 +185,16 @@ function PeopleAccessory(log, config, platform) {
     this.isGuest = ((typeof(config['isGuest']) != "undefined" && config['isGuest'] !== null)?config['isGuest']:false);
     this.statusOnly = ((typeof(config['statusOnly']) != "undefined" && config['statusOnly'] !== null)?config['statusOnly']:false);
     this.ignoreReEnterExitSeconds = config['ignoreReEnterExitSeconds'] || this.platform.ignoreReEnterExitSeconds;
+    this.onURL = config["on_url"] || "";
+    this.onMethod = config["on_method"] || "GET";
+    this.onBody = config["on_body"] || "";
+    this.onForm = config["on_form"] || "";
+    this.onHeaders = config["on_headers"] || "{}";
+    this.offURL = config["off_url"] || "";
+    this.offMethod = config["off_method"] || "GET";
+    this.offBody = config["off_body"] || "";
+    this.offForm = config["off_form"] || "";
+    this.offHeaders = config["off_headers"] || "{}";
     this.stateCache = false;
 
     class LastActivationCharacteristic extends Characteristic {
@@ -436,6 +446,45 @@ PeopleAccessory.prototype.setNewState = function(newState) {
                 status: (newState) ? 1 : 0
             });
         this.log('Changed occupancy state for %s (%s) to %s. Last successful ping %s , last webhook %s .', this.target, this.name, newState, lastSuccessfulPingMoment, lastWebhookMoment);
+        this.callHttpWebhook();
+    }
+}
+
+PeopleAccessory.prototype.callHttpWebhook = function() {
+    var urlToCall = this.onURL;
+    var urlMethod = this.onMethod;
+    var urlBody = this.onBody;
+    var urlForm = this.onForm;
+    var urlHeaders = this.onHeaders;
+    
+    if (!this.stateCache) {
+        urlToCall = this.offURL;
+        urlMethod = this.offMethod;
+        urlBody = this.offBody;
+        urlForm = this.offForm;
+        urlHeaders = this.offHeaders;
+    }
+    if (urlToCall !== "") {
+        var theRequest = {
+            method : urlMethod,
+            url : urlToCall,
+            timeout : DEFAULT_REQUEST_TIMEOUT,
+            headers: JSON.parse(urlHeaders)
+        };
+        if (urlMethod === "POST" || urlMethod === "PUT") {
+            if (urlForm) {
+                this.log("Adding Form " + urlForm);
+                theRequest.form = JSON.parse(urlForm);
+            }
+            else if (urlBody) {
+                this.log("Adding Body " + urlBody);
+                theRequest.body = urlBody;
+            }
+        }
+        request(theRequest, (function(err, response, body) {
+            var statusCode = response && response.statusCode ? response.statusCode : -1;
+            this.log("Request to '%s' finished with status code '%s' and body '%s'.", urlToCall, statusCode, body, err);
+        }).bind(this));
     }
 }
 
