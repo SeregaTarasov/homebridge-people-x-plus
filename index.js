@@ -40,7 +40,7 @@ function PeoplePlatform(log, config){
     this.ignoreReEnterExitSeconds = config["ignoreReEnterExitSeconds"] || 0;
     this.people = config['people'];
     this.storage = require('node-persist');
-    this.storage.initSync({dir:this.cacheDirectory});
+    this.storage.initSync({dir:this.cacheDirectory, forgiveParseErrors: true});
     this.webhookQueue = [];
 }
 
