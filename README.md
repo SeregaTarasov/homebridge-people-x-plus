@@ -27,7 +27,7 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
         "guestSensorName" : "Guests",
         "webhookEnabled" : false,
         "webhookPort": 51828,
-        "cacheDirectory": "./.node-persist/storage",
+        "cacheDirectory": "./persistent",
         "checkInterval": 10000,
         "ignoreReEnterExitSeconds": 0,
         "people" : [
@@ -79,7 +79,7 @@ It can also receive webhooks sent by location-aware mobile apps (such as [Locati
 | `isGuest`                  | optional, default: false                                                                                                                                                                     |
 | `statusOnly`               | optional, default: false                                                                                                                                                                     |
 | `webhookPort`              | optional, default: 51828                                                                                                                                                                     |
-| `cacheDirectory`           | optional, default: "./.node-persist/storage"                                                                                                                                                 |
+| `cacheDirectory`           | optional, default: "./persistent"                                                                                                                                                 |
 | `checkInterval`            | optional, in milliseconds, default: 10000, if set to -1 than the check mechanism will not be used                                                                                            |
 | `ignoreReEnterExitSeconds` | optional, in minutes, default: 0, if set to 0 than every enter/exit will trigger state change otherwise the state will only change if no re-enter/exit occurs in specified number of seconds |
 | `target`                   | may be either a hostname or IP address                                                                                                                                                       |
