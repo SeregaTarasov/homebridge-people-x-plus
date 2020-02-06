@@ -70,7 +70,7 @@ function PeoplePlatform(log, config){
     this.guestSensorOffHeaders = config["guestSensor_off_headers"] || "{}";
     this.people = config['people'];
     this.storage = require('node-persist');
-    this.storage.initSync({dir:this.cacheDirectory});
+    this.storage.initSync({dir:this.cacheDirectory, forgiveParseErrors: true});
     this.webhookQueue = [];
 }
 
