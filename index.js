@@ -579,13 +579,13 @@ PeopleAllAccessory.prototype.getStateFromCache = function() {
     var isGuestActive = this.getGuestStateFromCache();
     
     if(this.name === this.platform.nooneSensorName) {
-        return !isAnyoneActive;
+        return !isAnyoneActive && !isGuestActive;
     }
     else if(this.name === this.platform.guestSensorName) {
         return !isAnyoneActive && isGuestActive;
     }
     else {
-        return isAnyoneActive;
+        return isAnyoneActive || isGuestActive;
     }
 }
 
@@ -593,8 +593,9 @@ PeopleAllAccessory.prototype.getAnyoneStateFromCache = function() {
     for(var i = 0; i < this.platform.peopleAccessories.length; i++){
         var peopleAccessory = this.platform.peopleAccessories[i];
         var isActive = peopleAccessory.stateCache;
+        var isGuest = peopleAccessory.isGuest;
         var statusOnly = peopleAccessory.statusOnly;
-        if(isActive && !statusOnly) {
+        if(isActive && !statusOnly && !isGuest) {
             return true;
         }
     }
@@ -605,8 +606,8 @@ PeopleAllAccessory.prototype.getGuestStateFromCache = function() {
     for(var i = 0; i < this.platform.peopleAccessories.length; i++){
         var peopleAccessory = this.platform.peopleAccessories[i];
         var isActive = peopleAccessory.stateCache;
-        var statusOnly = peopleAccessory.statusOnly;
         var isGuest = peopleAccessory.isGuest;
+        var statusOnly = peopleAccessory.statusOnly;
         if(isActive && !statusOnly && isGuest) {
             return true;
         }
