@@ -15,9 +15,9 @@ module.exports = function(homebridge) {
     HomebridgeAPI = homebridge;
     FakeGatoHistoryService = require('fakegato-history')(homebridge);
 
-    homebridge.registerPlatform("homebridge-people", "PeopleXPlus", PeoplePlatform);
-    homebridge.registerAccessory("homebridge-people", "PeopleAccessory", PeopleAccessory);
-    homebridge.registerAccessory("homebridge-people", "PeopleAllAccessory", PeopleAllAccessory);
+    homebridge.registerPlatform("homebridge-people-x-plus", "PeopleXPlus", PeoplePlatform);
+    homebridge.registerAccessory("homebridge-people-x-plus", "PeopleAccessory", PeopleAccessory);
+    homebridge.registerAccessory("homebridge-people-x-plus", "PeopleAllAccessory", PeopleAllAccessory);
 }
 
 // #######################
@@ -280,9 +280,9 @@ function PeopleAccessory(log, config, platform) {
         }
     }
 
-    this.service = new Service.MotionSensor(this.name);
+    this.service = new Service.OccupancySensor(this.name);
     this.service
-        .getCharacteristic(Characteristic.MotionDetected)
+        .getCharacteristic(Characteristic.OccupancyDetected)
         .on('get', this.getState.bind(this));
 
     this.service.addCharacteristic(LastActivationCharacteristic);
@@ -445,7 +445,7 @@ PeopleAccessory.prototype.setNewState = function(newState) {
     var oldState = this.stateCache;
     if (oldState != newState) {
         this.stateCache = newState;
-        this.service.getCharacteristic(Characteristic.MotionDetected).updateValue(PeopleAccessory.encodeState(newState));
+        this.service.getCharacteristic(Characteristic.OccupancyDetected).updateValue(PeopleAccessory.encodeState(newState));
 
         if(this.platform.peopleAnyOneAccessory) {
             this.platform.peopleAnyOneAccessory.refreshState();
@@ -475,7 +475,7 @@ PeopleAccessory.prototype.setNewState = function(newState) {
                 time: moment().unix(),
                 status: (newState) ? 1 : 0
             });
-        this.log('Changed occupancy state for %s (%s) to %s. Last successful ping %s , last webhook %s .', this.target, this.name, newState, lastSuccessfulPingMoment, lastWebhookMoment);
+        this.log('Изменение статуса %s (%s) на %s. Последний успешный пинг %s .', this.target, this.name, newState, lastSuccessfulPingMoment);
         this.callHttpWebhook();
     }
 }
